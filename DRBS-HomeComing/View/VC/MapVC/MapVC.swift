@@ -149,6 +149,12 @@ final class MapVC: UIViewController {
 
 //MARK: - MKMapViewDelegate
 extension MapVC: MKMapViewDelegate {
+    
+    func setupAnnotationView(for annotation: House, on mapView: MKMapView) -> MKAnnotationView {
+        return mapView.dequeueReusableAnnotationView(withIdentifier: Constant.Identifier.annotationView.rawValue, for: annotation)
+    }
+
+    
     //어노테이션 뷰 선택됐을 때, 실행되는 메서드
     func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
         let modalVC = ModalVC()
@@ -160,23 +166,15 @@ extension MapVC: MKMapViewDelegate {
     
     //커스텀 어노테이션 뷰 설정
     func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
-        guard let annotation = annotation as? House else {return nil}
-        var annotationView = self.mkMapView.dequeueReusableAnnotationView(withIdentifier: Constant.Identifier.annotationView.rawValue)
-        if annotationView == nil {
-            annotationView = MKAnnotationView(annotation: annotation, reuseIdentifier: Constant.Identifier.annotationView.rawValue)
-            annotationView?.canShowCallout = false
-            annotationView?.contentMode = .scaleAspectFit
-        } else { annotationView?.annotation = annotation }
-        let annotationImage: UIImage!
-        switch annotation.isBookMarked {
-        case true:
-            annotationImage = UIImage(named: "testb1.png")
-        case false:
-            annotationImage = UIImage(named: "test1.png")
-        default:
-            annotationImage = UIImage()
-        }
-        annotationView?.image = annotationImage
+        // 사용자의 현 위치도 annotation의 일종이므로 처리해주어야함
+        guard !annotation.isKind(of: MKUserLocation.self) else { return nil }
+    
+        var annotationView: MKAnnotationView?
+    
+        guard let customAnnotation = annotation as? House else { return nil }
+        
+        
+        annotationView = setupAnnotationView(for: customAnnotation, on: mapView)
         return annotationView
     }
     
