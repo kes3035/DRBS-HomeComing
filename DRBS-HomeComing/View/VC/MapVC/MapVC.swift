@@ -83,7 +83,6 @@ final class MapVC: UIViewController {
         }
     }
     
-    
     private func removeAllAnnotations() {
         let annotations = mkMapView.annotations
         if !annotations.isEmpty {
@@ -223,6 +222,10 @@ extension MapVC: CLLocationManagerDelegate {
 }
 
 extension MapVC: searchViewDelegate {
+    func setTitle(title: String) {
+        
+    }
+    
     //선택한 지역을 받아와서 해당 지역으로 설정하는 메서드1
     func setRegion(cood: CLLocationCoordinate2D) {
         self.mkMapView.setRegion(.init(center: cood, span: .init(latitudeDelta: 0.1, longitudeDelta: 0.1)), animated: true)

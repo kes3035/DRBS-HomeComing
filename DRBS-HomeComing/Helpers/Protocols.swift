@@ -6,6 +6,7 @@ protocol CalendarDelegate: AnyObject {
 }
 protocol searchViewDelegate: AnyObject {
     func setRegion(cood: CLLocationCoordinate2D)
+    func setTitle(title: String)
 }
 protocol CellSelectedDelegate: AnyObject {
     func cellselected(houseTVCell: HouseTVCell, house: House)

@@ -80,6 +80,7 @@ extension SearchVC: UITableViewDelegate, UITableViewDataSource {
             guard let placeMark = response?.mapItems[0].placemark else { return }
             let coordinate = CLLocationCoordinate2D(latitude: placeMark.coordinate.latitude, longitude: placeMark.coordinate.longitude)
             self.searchViewDelegate?.setRegion(cood: coordinate)
+            self.searchViewDelegate?.setTitle(title: placeMark.title ?? "잘못된 주소")
             self.navigationController?.popViewController(animated: true)
         }
     }

@@ -1,6 +1,7 @@
 import UIKit
 import Then
 import SnapKit
+import MapKit
 
 final class CheckVC1: UIViewController {
     
@@ -13,18 +14,15 @@ final class CheckVC1: UIViewController {
         $0.text = "이름*"
         $0.font = UIFont(name: Constant.font, size: 16)
     }
-    
     private lazy var nameTextField = UITextField().then {
         $0.placeholder = "이름을 입력해주세요"
         $0.addTarget(self, action: #selector(textFieldEditingChanged(_:)), for: .editingChanged)
     }
-    
     private let tradeLabel = UILabel().then {
         $0.text = "거래 방식*"
         $0.font = UIFont(name: Constant.font, size: 16)
         $0.textColor = .darkGray
     }
-    
     private lazy var 월세버튼 = UIButton().then {
         $0.setTitle("월세", for: .normal)
         $0.setTitleColor(UIColor.darkGray, for: .normal)
@@ -33,7 +31,6 @@ final class CheckVC1: UIViewController {
         $0.layer.cornerRadius = 20
         $0.addTarget(self, action: #selector(buttonTapped(_:)), for: .touchUpInside)
     }
-    
     private lazy var 전세버튼 = UIButton().then {
         $0.setTitle("전세", for: .normal)
         $0.setTitleColor(UIColor.darkGray, for: .normal)
@@ -42,7 +39,6 @@ final class CheckVC1: UIViewController {
         $0.layer.cornerRadius = 20
         $0.addTarget(self, action: #selector(buttonTapped(_:)), for: .touchUpInside)
     }
-    
     private lazy var 매매버튼 = UIButton().then {
         $0.setTitle("매매", for: .normal)
         $0.setTitleColor(UIColor.darkGray, for: .normal)
@@ -123,8 +119,9 @@ final class CheckVC1: UIViewController {
         
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
         view.addGestureRecognizer(tapGesture)
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
+        setupKeyBoardEvents()
+//        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
+//        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -247,6 +244,11 @@ final class CheckVC1: UIViewController {
         navigationController?.navigationBar.standardAppearance = appearance
         navigationController?.navigationBar.compactAppearance = appearance
         navigationController?.navigationBar.scrollEdgeAppearance = appearance
+    }
+    
+    private func setupKeyBoardEvents() {
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
     }
     
     private func setUpLabel() {
@@ -372,16 +374,23 @@ final class CheckVC1: UIViewController {
     }
     
     @objc func keyboardWillShow(notification: NSNotification) {
-        if addressTextField.isFirstResponder {
-            if let keyboardSize = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue {
-                let textFieldBottom = addressTextField.frame.origin.y + addressTextField.frame.size.height
-                let keyboardTop = view.frame.size.height - keyboardSize.height
-                let offset = textFieldBottom - keyboardTop + 20
-                if offset > 0 {
-                    self.view.frame.origin.y = -offset
-                }
-            }
-        }
+//        if addressTextField.isFirstResponder {
+//            if let keyboardSize = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue {
+//                let textFieldBottom = addressTextField.frame.origin.y + addressTextField.frame.size.height
+//                let safelayoutguideTop = self.view.frame.origin.y
+//                let keyboardTop = view.frame.size.height - keyboardSize.height
+//                let offset = textFieldBottom - keyboardTop + 20
+//                if offset > 0 {
+//                    self.view.frame.origin.y = -offset
+//                }
+//                let textFieldTop = addressLabel.frame.origin.y
+//                let safelayoutguideTop = self.view.safeAreaLayoutGuide.layoutFrame.origin.y
+//                let offset = textFieldTop - safelayoutguideTop
+//                if offset > 0 {
+//                    self.view.frame.origin.y = -offset
+//                }
+//            }
+//        }
     }
     
     @objc func keyboardWillHide(notification: NSNotification) {
@@ -416,5 +425,29 @@ extension CheckVC1: UITextFieldDelegate {
             textField.resignFirstResponder()
         }
         return true
+    }
+    
+    func textFieldDidBeginEditing(_ textField: UITextField) {
+        if textField == addressTextField {
+            let searchVC = SearchVC()
+            searchVC.searchViewDelegate = self
+            self.navigationController?.pushViewController(searchVC, animated: true)
+        }
+    }
+    
+}
+
+//MARK: - SearchDelegate
+extension CheckVC1: searchViewDelegate {
+    func setRegion(cood: CLLocationCoordinate2D) {
+        
+    }
+    
+    //선택한 지역을 받아와서 해당 지역으로 설정하는 메서드1
+    func setTitle(title: String) {
+        //현재 받아오는 타이틀이
+        //현암로89번길, 용인시, 경기도, 대한민국
+        //이런상태라 바꾸는 로직 필요로 함.
+        self.addressTextField.text = title
     }
 }
