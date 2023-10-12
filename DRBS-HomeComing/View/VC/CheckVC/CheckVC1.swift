@@ -9,6 +9,14 @@ final class CheckVC1: UIViewController {
     
     var nameIndex: Int?
     var house: House?
+    var isAddressGained: Bool? {
+        didSet {
+            guard let isAddressGained = self.isAddressGained else { return }
+            if isAddressGained {
+                addDetailAddressTF()
+            }
+        }
+    }
     let houseViewModel = HouseViewModel()
     private let nameLabel = UILabel().then {
         $0.text = "이름*"
@@ -98,6 +106,11 @@ final class CheckVC1: UIViewController {
     private lazy var addressTextField = UITextField().then {
         $0.placeholder = "경기도 수원시 팔달구 덕영대로 924"
         $0.addTarget(self, action: #selector(textFieldEditingChanged(_:)), for: .editingChanged)
+    }
+    private lazy var detailAddressTextField  = UITextField().then {
+        $0.placeholder = "403호"
+        
+        
     }
     
     private lazy var nextButton = UIButton().then {
@@ -287,6 +300,10 @@ final class CheckVC1: UIViewController {
             }
         }
     }
+    private func addDetailAddressTF() {
+        //textField 추가하는 메서드
+        view.addSubview(detailAddressTextField)
+    }
     
     //MARK: - Actions
     
@@ -374,23 +391,23 @@ final class CheckVC1: UIViewController {
     }
     
     @objc func keyboardWillShow(notification: NSNotification) {
-//        if addressTextField.isFirstResponder {
-//            if let keyboardSize = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue {
-//                let textFieldBottom = addressTextField.frame.origin.y + addressTextField.frame.size.height
-//                let safelayoutguideTop = self.view.frame.origin.y
-//                let keyboardTop = view.frame.size.height - keyboardSize.height
-//                let offset = textFieldBottom - keyboardTop + 20
-//                if offset > 0 {
-//                    self.view.frame.origin.y = -offset
-//                }
+        if detailAddressTextField.isFirstResponder {
+            if let keyboardSize = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue {
+                let textFieldBottom = addressTextField.frame.origin.y + addressTextField.frame.size.height
+                let safelayoutguideTop = self.view.frame.origin.y
+                let keyboardTop = view.frame.size.height - keyboardSize.height
+                let offset = textFieldBottom - keyboardTop + 60
+                if offset > 0 {
+                    self.view.frame.origin.y = -offset
+                }
 //                let textFieldTop = addressLabel.frame.origin.y
 //                let safelayoutguideTop = self.view.safeAreaLayoutGuide.layoutFrame.origin.y
 //                let offset = textFieldTop - safelayoutguideTop
 //                if offset > 0 {
 //                    self.view.frame.origin.y = -offset
 //                }
-//            }
-//        }
+            }
+        }
     }
     
     @objc func keyboardWillHide(notification: NSNotification) {
@@ -439,15 +456,21 @@ extension CheckVC1: UITextFieldDelegate {
 
 //MARK: - SearchDelegate
 extension CheckVC1: searchViewDelegate {
-    func setRegion(cood: CLLocationCoordinate2D) {
-        
-    }
-    
-    //선택한 지역을 받아와서 해당 지역으로 설정하는 메서드1
-    func setTitle(title: String) {
+    func setRegionAndTitle(cood: CLLocationCoordinate2D?, title: String?) {
+        guard let title = title else { return }
         //현재 받아오는 타이틀이
         //현암로89번길, 용인시, 경기도, 대한민국
         //이런상태라 바꾸는 로직 필요로 함.
         self.addressTextField.text = title
+//        self.isAddressGained = true
+        view.addSubview(detailAddressTextField)
+        DispatchQueue.main.async {
+            self.detailAddressTextField.snp.makeConstraints {
+                $0.top.equalTo(self.addressTextField.snp.bottom).offset(20)
+                $0.height.equalTo(30)
+                $0.leading.equalTo(self.view.safeAreaLayoutGuide.snp.leading).offset(23)
+                $0.trailing.equalTo(self.view.safeAreaLayoutGuide.snp.trailing).offset(-23)
+            }
+        }
     }
 }
