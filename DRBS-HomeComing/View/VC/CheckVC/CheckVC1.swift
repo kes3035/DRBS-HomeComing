@@ -9,14 +9,6 @@ final class CheckVC1: UIViewController {
     
     var nameIndex: Int?
     var house: House?
-    var isAddressGained: Bool? {
-        didSet {
-            guard let isAddressGained = self.isAddressGained else { return }
-            if isAddressGained {
-                addDetailAddressTF()
-            }
-        }
-    }
     let houseViewModel = HouseViewModel()
     private let nameLabel = UILabel().then {
         $0.text = "이름*"
@@ -459,10 +451,18 @@ extension CheckVC1: searchViewDelegate {
     func setRegionAndTitle(cood: CLLocationCoordinate2D?, title: String?) {
         guard let title = title else { return }
         //현재 받아오는 타이틀이
-        //현암로89번길, 용인시, 경기도, 대한민국
-        //이런상태라 바꾸는 로직 필요로 함.
-        self.addressTextField.text = title
-//        self.isAddressGained = true
+        //현암로89번길, 용인시, 경기도, 대한민국 이므로 올바른 형식으로 재배열하는 로직
+        var address = ""
+        var total = ""
+        for character in title {
+            guard character != "," else { continue }
+            address += String(character)
+            guard character == " " else { continue }
+            total = address + total
+            address = ""
+        }
+        
+        self.addressTextField.text = total
         view.addSubview(detailAddressTextField)
         DispatchQueue.main.async {
             self.detailAddressTextField.snp.makeConstraints {
